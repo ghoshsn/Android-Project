@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">My Collection Pro</string>
+    <string name="title_movies">My Collection - Item List</string>
+    <string name="title_edit_movie">My Collection - Edit</string>
+    <string name="title_rentals">My Collection - Loaned</string>
+    <string name="title_categories">My Collection - Categories</string>
+    <string name="title_edit_rental">My Collection - Edit</string>
+    <string name="title_import_file">My Collection - Select a File</string>
+    <string name="title_preferences">My Collection - Preferences</string>
+    <string name="title_about">About My Collection Pro</string>
+    <string name="app_description">Application for managing private movie, game, and book collections</string>
+    <string name="menu_add">New</string>
+    <string name="add_menu_shortcut">a</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_remove">Delete</string>
+    <string name="menu_save">Save</string>
+    <string name="menu_cancel">Cancel</string>
+    <string name="menu_loan_out">Loan Out</string>
+    <string name="menu_import">Import</string>
+    <string name="menu_export">Export</string>
+    <string name="menu_categories">Categories</string>
+    <string name="menu_rentals">Loaned</string>
+    <string name="menu_scan">Scan Barcode</string>
+    <string name="menu_about">About</string>
+    <string name="menu_lookup">Lookup</string>
+    <string name="menu_preferences">Preferences</string>
+    <string name="about_version">v1.5.14</string>
+    <string name="about_text">
+    	"MyCollection was created by Timothy A. DeWees.
+    	
+This program is a simple application to manage your Movies/Games/Books/CD and who you loan them out to.
+    	
+A special thanks to Alexis Gonzalez for the donation of various icons and to all the user community for your generous feedback.
+		
+For CSV File Format See:
+http://whiteyflipssomebits.blogspot.com/2009/01/mymovies-version-112.html"
+    </string>
+    <string name="app_author_website">http://whiteyflipssomebits.blogspot.com/</string>
+    <string name="search_url_type_upc">http://www.tdtech.org/?TYPE=%s&amp;UPC=%s</string>
+    <string name="search_url_upc">http://www.tdtech.org/?UPC=%s</string>
+    <string name="search_type_movies">movies</string>
+    <string name="search_type_games">games</string>
+    <string name="search_type_books">books</string>
+    <string name="search_type_music">music</string>
+    <string name="category">Category</string>
+    <string name="title">Title</string>
+    <string name="rank">Rank</string>
+    <string name="rating">Rating</string>
+    <string name="status">Status</string>
+    <string name="type">Type</string>
+    <string name="confirm">Save</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+    <string name="filter">Search</string>
+    <string name="upc">UPC</string>
+    <string name="author">Author</string>
+    <string name="artist">Artist</string>
+    <string name="year">Release Date</string>
+    <string name="up_one_level">..</string>
+    <string name="current_dir">.</string>
+    <string name="rental_contact">Contact</string>
+    <string name="rental_date_out">Date Out</string>
+    <string name="rental_movie">Movie</string>   
+    <string name="preferences_show_movie">Show Movie Tab:</string>
+    <string name="preferences_show_book">Show Book Tab:</string>
+    <string name="preferences_show_game">Show Game Tab:</string>
+    <string name="preferences_show_cd">Show CD Tab:</string>
+    <string name="preferences_show_rental">Show Loan Tab:</string>
+    <string name="preferences_default">Default Tab:</string>
+    <string name="preferences_region">Amazon Site:</string> 
+</resources>

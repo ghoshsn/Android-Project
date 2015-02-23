@@ -1,0 +1,131 @@
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection
+END
+MyCollection.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection/MyCollection.java
+END
+Preferences.java
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/Preferences.java
+END
+movies.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection/movies.java
+END
+MovieLookupData.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/MovieLookupData.java
+END
+AmazonResponseHelper.java
+K 25
+svn:wc:ra_dav:version-url
+V 98
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection/AmazonResponseHelper.java
+END
+SearchResult.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection/SearchResult.java
+END
+CategoriesPanelAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 99
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/CategoriesPanelAdapter.java
+END
+Rentals.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/Rentals.java
+END
+MoviesDbAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 92
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/MoviesDbAdapter.java
+END
+About.java
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/About.java
+END
+CsvReader.java
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/CsvReader.java
+END
+EditCategory.java
+K 25
+svn:wc:ra_dav:version-url
+V 89
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/EditCategory.java
+END
+AndroidFileBrowser.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/AndroidFileBrowser.java
+END
+EditMovie.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection/EditMovie.java
+END
+Categories.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/Categories.java
+END
+NotificationHelper.java
+K 25
+svn:wc:ra_dav:version-url
+V 95
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/NotificationHelper.java
+END
+CsvWriter.java
+K 25
+svn:wc:ra_dav:version-url
+V 86
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/CsvWriter.java
+END
+RentalsPanelAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 96
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/RentalsPanelAdapter.java
+END
+MyMoviesPanelAdapter.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/MyMoviesPanelAdapter.java
+END
+EditRental.java
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/8/trunk/Android/MyCollectionPro/src/com/app/my_collection/EditRental.java
+END
+AmazonRequestHelper.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/!svn/ver/13/trunk/Android/MyCollectionPro/src/com/app/my_collection/AmazonRequestHelper.java
+END

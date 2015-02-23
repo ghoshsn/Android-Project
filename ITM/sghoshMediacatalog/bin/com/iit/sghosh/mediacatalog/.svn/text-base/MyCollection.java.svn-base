@@ -1,0 +1,126 @@
+package com.app.my_collection;
+
+import java.util.Locale;
+
+import android.app.ProgressDialog;
+import android.app.TabActivity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.widget.TabHost;
+import android.os.AsyncTask;
+import android.os.Bundle;
+
+public class MyCollection extends TabActivity {
+
+	private Intent movieIntent = null;
+	private Intent cdIntent = null;
+	private Intent gameIntent = null;
+	private Intent bookIntent = null;
+	private Intent rentalIntent = null;
+	private static final String KEY_MOVIE = "Movie";
+	private static final String KEY_GAME = "Game";
+	private static final String KEY_BOOK = "Book";
+	private static final String KEY_CD = "CD";
+	ProgressDialog pd = null;
+	
+	@Override  
+	protected void onCreate(Bundle savedInstanceState) {  
+         super.onCreate(savedInstanceState);  
+         SharedPreferences settings = getSharedPreferences(Preferences.PREFS_NAME, 0);
+         String region = settings.getString(Preferences.KEY_REGION, getResources().getConfiguration().locale.getDisplayName());
+         if(region.equals(Locale.US.getDisplayName())) {
+        	 Configuration config = getResources().getConfiguration();
+        	 config.locale = Locale.US;
+        	 Locale.setDefault(Locale.US);
+        	 getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+         } else if(region.equals(Locale.UK.getDisplayName())) {
+        	 Configuration config = getResources().getConfiguration();
+        	 config.locale = Locale.UK;
+        	 Locale.setDefault(Locale.UK);
+        	 getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+         }
+         TabHost host = getTabHost();
+         host.clearAllTabs();
+         host.clearFocus();
+         
+         createTabs();
+	} 
+	
+	protected void createTabs() {
+		
+		SharedPreferences settings = getSharedPreferences(Preferences.PREFS_NAME, 0);
+		int index = 0;
+		int bookIndex = 0;
+		int cdIndex = 0;
+		int gameIndex = 0;
+		int movieIndex = 0;
+		int loanIndex = 0;
+		String defaultTab = "";
+		TabHost host = getTabHost();  
+		
+		if(settings.getBoolean(Preferences.KEY_SHOW_BOOK_TAB, true)){
+			bookIntent = new Intent(this, movies.class);
+			bookIntent.putExtra(MoviesDbAdapter.KEY_MOVIE_TYPE, KEY_BOOK);
+			host.addTab(host.newTabSpec("one")  
+                .setIndicator("Book")  
+                .setContent(bookIntent));
+			bookIndex = index;
+			index++;
+		}
+		if(settings.getBoolean(Preferences.KEY_SHOW_CD_TAB, true)) {
+	        cdIntent = new Intent(this, movies.class);
+	        cdIntent.putExtra(MoviesDbAdapter.KEY_MOVIE_TYPE, KEY_CD);
+	        host.addTab(host.newTabSpec("two")
+	        		.setIndicator("CD")
+	        		.setContent(cdIntent));
+	        cdIndex = index;
+	        index ++;
+		}
+		if(settings.getBoolean(Preferences.KEY_SHOW_GAME_TAB, true)) {
+	        gameIntent = new Intent(this, movies.class);
+	        gameIntent.putExtra(MoviesDbAdapter.KEY_MOVIE_TYPE, KEY_GAME);
+	        host.addTab(host.newTabSpec("three")  
+	                .setIndicator("Game")  
+	                .setContent(gameIntent));
+	        gameIndex = index;
+	        index ++;
+		}
+		if(settings.getBoolean(Preferences.KEY_SHOW_MOVIE_TAB, true)) {
+	        movieIntent = new Intent(this, movies.class);
+	        movieIntent.putExtra(MoviesDbAdapter.KEY_MOVIE_TYPE, KEY_MOVIE);
+	        host.addTab(host.newTabSpec("four")  
+	                        .setIndicator("Movie")  
+	                        .setContent(movieIntent));
+	        movieIndex = index;
+	        index++;
+		}
+		if(settings.getBoolean(Preferences.KEY_SHOW_LOAN_TAB, true)) {
+	        rentalIntent = new Intent(this, Rentals.class);
+	        host.addTab(host.newTabSpec("five")  
+	                       .setIndicator("Loans")  
+	                        .setContent(rentalIntent));
+	        loanIndex = index;
+		}
+		//Set default tab index
+		defaultTab = settings.getString(Preferences.KEY_DEFAULT_TAB, "").toUpperCase();
+		if(defaultTab.equals("BOOK")){
+			index = bookIndex;
+		} else if(defaultTab.equals("CD")){
+			index = cdIndex;
+		} else if(defaultTab.equals("GAME")){
+			index = gameIndex;
+		} else if(defaultTab.equals("MOVIE")){
+			index = movieIndex;
+		} else if(defaultTab.equals("LOAN")){
+			index = loanIndex;
+		} else {
+			index = 0;
+		}
+		
+		host.setCurrentTab(index);
+		setDefaultTab(index);
+        
+	}
+
+}

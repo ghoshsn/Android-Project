@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <array name="ratings">
+    	 <item>NR</item>
+    	 <item>G</item>
+    	 <item>PG</item>
+    	 <item>PG-13</item>
+    	 <item>R</item>
+    	 <item>NC-17</item>
+    	 <item>TV-Y</item>
+    	 <item>TV-Y7</item>
+    	 <item>TV-G</item>
+    	 <item>TV-PG</item>
+    	 <item>TV-14</item>
+    	 <item>TV-MA</item>
+     </array>
+     <array name="statuses">
+    	 <item>New</item>
+    	 <item>Good</item>
+    	 <item>Poor</item>
+    	 <item>Damaged</item>
+     </array>
+     <array name="types">
+    	 <item>Video</item>
+    	 <item>Game</item>
+    	 <item>Book</item>
+    	 <item>AUDIO</item>
+     </array>
+     <array name="tabs">
+    	 <item>Video</item>
+    	 <item>Game</item>
+    	 <item>Book</item>
+    	 <item>Audio</item>
+     </array>
+     <array name="types_video">
+     	<item>AIFF</item>
+		<item>WAV</item>
+		<item>XMF</item>
+		<item>3GP</item>
+		<item>ASF</item>
+		<item>AVI</item>
+		<item>DVR-MS</item>
+		<item>FLASH</item>
+		<item>IFF</item>
+		<item>MKV</item> 
+		<item>MJ2</item>
+		<item>QUICKTIME</item>
+		<item>MPEG</item>
+		<item>MPEG-2</item>
+		<item>MP4</item>
+		<item>Ogg</item>
+		<item>RM</item>
+		<item>NUT</item>
+		<item>MXF</item>
+		<item>GXF</item>
+		<item>ratDVD</item>
+		<item>SVI</item>
+		<item>VOB</item>
+		<item>DIVX</item>
+    	 <item>DVD</item>
+    	 <item>Blu-ray</item>
+    	 <item>HD-DVD</item>
+    	 <item>Laser Disk</item>
+    	 <item>VHS</item>
+    	 <item>uMD</item>
+     </array>
+     <array name="types_game">
+     	<item>Gameboy</item>
+     	<item>Game Cube</item>
+     	<item>Mac</item>
+     	<item>Nintendo DS</item>
+     	<item>PC</item>
+    	<item>PS1</item>
+    	<item>PS2</item>
+    	<item>PS3</item>
+    	<item>PSP</item>
+     	<item>Wii</item>
+     	<item>XBOX</item>
+    	<item>XBOX 360</item>
+    	<item>NES</item>
+    	<item>SNES</item>
+    	<item>N64</item>
+    	<item>Sega Master System</item>
+    	<item>Sega Genesis</item>
+    	<item>Sega Saturn</item>
+    	<item>Dreamcast</item>
+     </array>
+     <array name="types_book">
+     	<item>Arghos Diffusion (digital)</item>
+		<item>Flip Books (digital)</item>
+		<item>ANSI/NISO Z39.86 (DAISY) (digital)</item>
+		<item>FictionBook (Fb2) (digital)</item>
+		<item>Text Encoding Initiative (digital)</item>
+		<item>Plucker (digital)</item>
+		<item>Compressed HM (digital)</item>
+		<item>Portable Document Format (digital)</item>
+		<item>PostScript (digital)</item>
+		<item>DjVu (digital)</item>
+		<item>Microsoft LIT (digital)</item>
+		<item>eReader (digital)</item>
+		<item>Desktop Author (digital)</item>
+		<item>Newton eBook (digital)</item>
+		<item>Founder Electronics (digital)</item>
+		<item>Mobipocket (digital)</item>
+		<item>EPUB (digital)</item>
+		<item>Broadband eBooks (BBeB) (digital)</item>
+		<item>SSReader (digital)</item>
+		<item>TealDoc (digital)</item>
+		<item>IEC 62448 (digital)</item>
+		<item>Comic Book Archive file (digital)</item>
+		<item>Multimedia eBooks (digital)</item>
+     	<item>Audiobook</item>
+     	<item>Coffee Table Book</item>
+     	<item>Hardcover</item>
+     	<item>Softcover</item>
+     	<item>Oversized</item>
+     	<item>Paperback</item>
+     </array>
+     <array name="types_audio">
+		<item>ACT (digital)</item>
+		<item>AIFF (digital)</item> 
+		<item>AAC (digital)</item> 
+		<item>ALAC (digital)</item> 
+		<item>ATRAC (digital)</item>
+		<item>AU (digital)</item> 
+		<item>CD</item>
+		<item>DCT (digital)</item> 
+		<item>DSS (digital)</item>
+		<item>DVDA</item>
+		<item>DVF (digital)</item>
+		<item>FLAC (digital)</item>
+		<item>HDCD</item>
+		<item>IKLAX (digital)</item>
+		<item>IVS(digital)</item> 
+		<item>m4p (digital)</item>
+		<item>mp3 (digital)</item>
+		<item>msv (digital)</item>
+		<item>OGG (digital)</item>
+		<item>TTA (digital)</item>
+		<item>Vinyl</item>
+		<item>Vorbis (digital)</item> 
+		<item>WAV (digital)</item>
+		<item>WMA (digital)</item>
+     </array>
+</resources>

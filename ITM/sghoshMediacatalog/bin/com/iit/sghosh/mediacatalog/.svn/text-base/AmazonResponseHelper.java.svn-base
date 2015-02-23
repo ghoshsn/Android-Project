@@ -1,0 +1,43 @@
+/*****************************************************************************
+ * Name..........: AmazonResponseHelper
+ * 
+ * Description...: Helper class for processing a response from Amazon
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 03/01/2009)
+ *                     Initial writing
+ *****************************************************************************/
+package com.app.my_collection;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class AmazonResponseHelper {
+    
+    public AmazonResponseHelper() {
+    }
+    
+    public List<SearchResult> parseResults(String results) {
+    	List<SearchResult> resultList = null;
+    	String[] lines = results.split("\r\n");
+    	if(lines.length > 1) {
+    		resultList = new ArrayList<SearchResult>();
+	    	for(int i = 1; i < lines.length; i++) {
+	    		String[] lineData = lines[i].split("\\|");
+	    		SearchResult result = new SearchResult();
+	    		result.setTitle(lineData[0]);
+	    		result.setDescription(lineData[1]);
+	    		result.setLargeUrl(lineData[2]);
+	    		result.setSmallUrl(lineData[2]);
+	    		result.setArtist(lineData[3]);
+	    		result.setAuthor(lineData[4]);
+	    		resultList.add(result);
+	    	}
+    	}
+    	return resultList;
+    }//End of method public List<SearchResult> parseResults(String results)
+    
+}//End of class AmazonResponseHelper()

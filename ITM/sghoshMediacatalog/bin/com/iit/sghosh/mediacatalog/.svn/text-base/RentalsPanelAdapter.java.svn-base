@@ -1,0 +1,108 @@
+/*****************************************************************************
+ * Name..........: RentalsPanelAdapter.java
+ * 
+ * Description...: Main activity for the MyMovies application
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 01/19/2009)
+ *                     Added document header
+ *****************************************************************************/
+package com.app.my_collection;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.CursorAdapter;
+import android.widget.TableLayout;
+import android.widget.TableRow;
+import android.widget.TextView;
+
+public class RentalsPanelAdapter extends CursorAdapter {
+
+	Cursor _cursor;
+	Context _context;
+	
+	public RentalsPanelAdapter(Context context, Cursor c) {
+		super(context, c);
+		_context = context;
+		_cursor = c;
+	}
+
+	@Override
+	public void bindView(View view, Context context, Cursor cursor) {
+		if (view != null) {
+			CellRendererView cell = (CellRendererView) view;
+			cell.display(cursor);
+		}
+	}//End of method public void bindView(View, Context, Cursor)
+
+	@Override
+	public View newView(Context context, Cursor cursor, ViewGroup parent) {
+		CellRendererView cellRenderView = new CellRendererView();
+		return cellRenderView;
+	}//End of method public View newView(Context, Cursor, ViewGroup)
+
+	/**
+	 * This is an embedded class for rendering the content of a given 
+	 * list item.
+	 * 
+	 * @author Timothy A. DeWees
+	 *
+	 */
+	public class CellRendererView extends TableLayout {
+
+		private TextView _lblContactName;
+		private TextView _lblTitle;
+		private TableRow _contactRow;
+		private TableRow _titleRow;
+		private static final int LEFT_PADDING = 2;
+		private static final int TOP_PADDING = 2;
+		private static final int RIGHT_PADDING = 2;
+		private static final int BOTTOM_PADDING = 2;
+
+		public CellRendererView() {
+			super(_context);
+			_createUI();
+		}//End of construcor
+
+		private void _createUI() {
+
+			// Setup controls behavoirs
+			setColumnShrinkable(1, true);
+			setColumnStretchable(1, true);
+
+			// set the padding
+			setPadding(LEFT_PADDING, TOP_PADDING, RIGHT_PADDING, BOTTOM_PADDING);
+
+			// single row that holds icon/flag & name
+			_contactRow = new TableRow(_context);
+			_lblContactName = new TextView(_context);
+			_lblContactName.setPadding(LEFT_PADDING, TOP_PADDING, RIGHT_PADDING,
+					BOTTOM_PADDING);
+			_titleRow = new TableRow(_context);
+			_lblTitle = new TextView(_context);
+			_lblTitle.setPadding(LEFT_PADDING + 4, TOP_PADDING, RIGHT_PADDING,
+					BOTTOM_PADDING);
+
+			_contactRow.addView(_lblContactName);
+			_titleRow.addView(_lblTitle);
+			addView(_contactRow);
+			addView(_titleRow);
+		}//End of method private void _createUI()
+
+		public void display(Cursor c) {
+			MoviesDbAdapter dba = new MoviesDbAdapter(_context);
+			dba.open();
+			if (c != null) {
+				_lblContactName.setText(dba.fetchContactNameByContactId(c.getLong(c.getColumnIndex(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID))));
+				_lblTitle.setText(dba.fetchMovieTitleByMovieId(c.getLong(c.getColumnIndex(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID))));
+			}
+		}//End of method public void display(Cursor)
+		
+	}//End of embedded class CellRenderView
+
+}//End of class RentalsPanelAdapter

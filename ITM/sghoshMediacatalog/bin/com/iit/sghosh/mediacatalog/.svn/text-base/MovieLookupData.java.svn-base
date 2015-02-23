@@ -1,0 +1,74 @@
+/*****************************************************************************
+ * Name..........: MovieLookupData
+ * 
+ * Description...: Activity for editing a movie
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 12/22/2008)
+ *                     Initial writing - Boxing object for storing information
+ *                     about a movie
+ *****************************************************************************/
+package com.app.my_collection;
+
+
+public class MovieLookupData {
+
+	/**************************
+	 * CLASS FIELDS
+	 */
+	private String _title = "";
+	private String _rating = "";
+	private String _upc = "";
+	private String _lookupMessage = "";
+	private boolean _lookupValid = false;
+	
+	/**************************
+	 * ACCESSORS
+	 */
+	public String getTitle() {
+		return _title;
+	}//End of public accessor getTitle()
+	
+	public String getRating() {
+		return _rating;
+	}//End of public accessor getRating()
+	
+	public String getUpc() {
+		return _upc;
+	}//End of public accessor getUpc()
+	
+	public String getLookupMessage() {
+		return _lookupMessage;
+	}//End of public accessor getLookupMessage()
+	
+	public boolean isLookupValid() {
+		return _lookupValid;
+	}//End of public accessor isLookupValid()
+	
+	/**************************
+	 * MUTATORS
+	 */
+	public void setTitle(String title) {
+		_title = title;
+	}//End of public mutator setTitle(String)
+	
+	public void setRating(String rating) {
+		_rating = rating;
+	}//End of public mutator setRating(String)
+	
+	public void setUpc(String upc) {
+		_upc = upc;
+	}//End of public mutator setUpc(String)
+	
+	public void setLookupMessage(String lookupMessage) {
+		_lookupMessage = lookupMessage;
+	}//End of public mutator setLookupMessage(String)
+	
+	public void setLookupValidity(boolean valid) {
+		_lookupValid = valid;
+	}//End of public mutator setLookupValidity(Boolean)
+	
+}

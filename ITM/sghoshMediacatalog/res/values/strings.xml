@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Media Catalog App IIT ITM-555 Spring 2011</string>
+    <string name="title_video">Media Catalog - Item List</string>
+    <string name="title_edit_video">Media Catalog - Edit</string>
+    <string name="title_categories">Media Catalog - Categories</string>
+    <string name="title_import_file">Media Catalog - Select a File</string>
+    <string name="title_preferences">Media Catalog - Preferences</string>
+    <string name="title_about">About Media Catalog</string>
+    <string name="app_description">Application for managing Media collections</string>
+    <string name="menu_add">New</string>
+    <string name="add_menu_shortcut">a</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_remove">Delete</string>
+    <string name="menu_save">Save</string>
+    <string name="menu_cancel">Cancel</string>
+    <string name="menu_import">Import</string>
+    <string name="menu_export">Export</string>
+    <string name="menu_categories">Categories</string>
+    <string name="menu_about">About</string>
+    <string name="menu_preferences">Preferences</string>
+    <string name="about_version">Version: 1.0</string>
+    <string name="about_text">
+    	Santanu Ghosh ITM-555 Spring 2011
+    	Illinois Institute of Technology
+    	Chicago, Illinois, USA
+    </string>
+    <string name="search_type_video">video</string>
+    <string name="search_type_games">games</string>
+    <string name="search_type_books">books</string>
+    <string name="search_type_music">music</string>
+    <string name="category">Category</string>
+    <string name="title">Title</string>
+    <string name="rank">Rank</string>
+    <string name="rating">Rating</string>
+    <string name="status">Status</string>
+    <string name="type">Type</string>
+    <string name="confirm">Save</string>
+    <string name="remove">Remove</string>
+    <string name="cancel">Cancel</string>
+    <string name="filter">Find</string>
+    <string name="author">Author</string>
+    <string name="artist">Artist</string>
+    <string name="year">Release Date</string>
+    <string name="up_one_level">..</string>
+    <string name="current_dir">.</string> 
+    <string name="preferences_show_video">Show Video Screen:</string>
+    <string name="preferences_show_book">Show Book Screen:</string>
+    <string name="preferences_show_game">Show Game Screen:</string>
+    <string name="preferences_show_audio">Show Audio Screen:</string>
+    <string name="preferences_default">Default Screen:</string>
+</resources>

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="fill_parent"
+	android:layout_height="fill_parent" 
+	android:layout_weight="1" >
+	<LinearLayout android:id="@+id/container"
+		android:orientation="vertical" android:layout_width="fill_parent"
+		android:layout_height="fill_parent">
+		<TableLayout
+			xmlns:android="http://schemas.android.com/apk/res/android"
+			android:layout_height="wrap_content"
+			android:layout_width="fill_parent">
+			<TableRow>
+				<ImageView android:id="@+id/large_image" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1" />
+			</TableRow>
+			<TableRow android:id="@+id/artist_row">
+				<TextView android:id="@+id/artist_label"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/artist" />
+				<EditText android:id="@+id/artist" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"
+					android:inputType="textCapSentences"
+					android:imeOptions="actionNext" />
+			</TableRow>
+			<TableRow android:id="@+id/author_row">
+				<TextView android:id="@+id/author_label" 
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/author" />
+				<EditText android:id="@+id/author" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"
+					android:inputType="textCapSentences"
+					android:imeOptions="actionNext"  />
+			</TableRow>
+			<TableRow>
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/title" />
+				<EditText android:id="@+id/title" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"
+					android:inputType="textCapSentences"
+					android:imeOptions="actionNext"  />
+			</TableRow>
+			<TableRow android:id="@+id/year_row">
+				<TextView android:id="@+id/year_label"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/year" />
+				<EditText android:id="@+id/year" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"
+					android:inputType="textCapSentences"
+					android:imeOptions="actionDone"  />
+			</TableRow>
+			<TableRow>
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/category" />
+				<Spinner android:id="@+id/category" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"/>
+			</TableRow>
+			<TableRow android:id="@+id/rating_row">
+				<TextView android:id="@+id/rating_label"
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/rating" />
+				<Spinner android:id="@+id/rating" 
+				 	android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1" />
+			</TableRow>
+			<TableRow>
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/status" />
+				<Spinner android:id="@+id/status" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"/>
+			</TableRow>
+			<TableRow>		
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/type" />
+				<Spinner android:id="@+id/type" 
+				  android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:layout_weight="1"/>
+			</TableRow>
+			<TableRow>		
+				<TextView android:layout_width="wrap_content"
+					android:layout_height="wrap_content" 
+					android:text="@string/rank" />
+				<LinearLayout android:layout_width="wrap_content"
+	   				android:layout_height="wrap_content">
+					<Button android:id="@+id/rank1"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content" 
+						android:background="@drawable/disabled_star_large" />
+					<Button android:id="@+id/rank2"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content" 
+						android:background="@drawable/disabled_star_large" />
+					<Button android:id="@+id/rank3" 
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:background="@drawable/disabled_star_large" />
+					<Button android:id="@+id/rank4" 
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content"
+						android:background="@drawable/disabled_star_large" />
+					<Button android:id="@+id/rank5" 
+						android:background="@drawable/disabled_star_large"
+						android:layout_width="wrap_content"
+						android:layout_height="wrap_content" />
+				</LinearLayout>
+			</TableRow>
+		</TableLayout>	
+	</LinearLayout>
+</ScrollView>

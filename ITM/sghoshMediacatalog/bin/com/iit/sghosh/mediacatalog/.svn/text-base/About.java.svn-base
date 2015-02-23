@@ -1,0 +1,53 @@
+/*****************************************************************************
+ * Name..........: About
+ * 
+ * Description...: About page for My Collection Pro
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 2/18/2009)
+ *                     Initial writing
+ *****************************************************************************/
+package com.app.my_collection;
+
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.Button;
+
+public class About extends Activity{
+	
+	/***************************
+	 * CLASS FIELDS
+	 ***************************/
+	private Button mAuthor = null;
+	
+	/** 
+	 * Called when the activity is first created. 
+	 */
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.about);
+		setTitle(R.string.title_about);
+		
+		mAuthor = (Button)findViewById(R.id.about_author_button);
+		mAuthor.setOnClickListener( new OnClickListener() {
+
+			@Override
+			public void onClick(View arg0) {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setData(Uri.parse(getResources().getString(R.string.app_author_website)));
+				startActivity(intent); 
+			}
+			
+		});
+	}//End of method public void onCreate(Bundle)
+	
+}//End of class About

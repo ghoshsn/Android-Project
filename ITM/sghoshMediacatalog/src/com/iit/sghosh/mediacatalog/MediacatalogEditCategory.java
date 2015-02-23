@@ -1,0 +1,231 @@
+/*****************************************************************************
+ * Name..........: MediacatalogCategoriesEditCategories.java
+ * Description...: Performs CRUD on a categories record
+ *****************************************************************************/
+package com.iit.sghosh.mediacatalog;
+
+import com.iit.sghosh.mediacatalog.R;
+
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.EditText;
+import android.widget.Spinner;
+
+public class MediacatalogEditCategory extends Activity {
+
+	/****************
+	 * CLASS FIELDS *
+	 ****************/
+	private Spinner mType;
+	private String _Type = "";
+	private EditText mName = null;
+	private String _Name = "";
+	private Long mRowId = null;
+	private MediacatalogDataBaseSetup mDbHelper;
+	private static final int SAVE_ID = Menu.FIRST;
+	private static final int DELETE_ID = Menu.FIRST + 1;
+	private static final int CANCEL_ID = Menu.FIRST + 2;
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch (item.getItemId()) {
+		case DELETE_ID:
+			DeleteCategory();
+			return true;
+		case SAVE_ID:
+			SaveCategory();
+			return true;
+		case CANCEL_ID:
+			CancelAction();
+			return true;
+		}
+
+		return super.onMenuItemSelected(featureId, item);
+	}// End of method public boolean onMenuItemSelected(int, MenuItem)
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		MenuItem item = menu.add(0, SAVE_ID, 0, R.string.menu_save);
+		item.setIcon(android.R.drawable.ic_menu_save);
+		MenuItem item1 = menu.add(0, DELETE_ID, 0, R.string.menu_remove);
+		item1.setIcon(android.R.drawable.ic_menu_delete);
+		MenuItem item2 = menu.add(0, CANCEL_ID, 0, R.string.menu_cancel);
+		item2.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
+		return true;
+	}// End of method public boolean onCreateOptionsMenu(Menu)
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Intent intent = getIntent();
+		if (mRowId != null) {
+			intent.putExtra(MediacatalogDataBaseSetup.KEY_CATEGORY_ID, mRowId);
+		}
+		if (!_Type.equals(""))
+			intent.putExtra(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE, _Type);
+		if (!_Name.equals(""))
+			intent.putExtra(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME, _Name);
+	}// End of method protected void onPause()
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		mDbHelper = new MediacatalogDataBaseSetup(this);
+		mDbHelper.open();
+
+		setContentView(R.layout.category_edit);
+	
+		mType = (Spinner) findViewById(R.id.category_type);
+		// Type
+		ArrayAdapter<CharSequence> typeAdapter = ArrayAdapter
+				.createFromResource(this, R.array.types,
+						android.R.layout.simple_spinner_item);
+		typeAdapter
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mType.setAdapter(typeAdapter);
+
+		//
+		// Setup the contact spinner
+		//
+		mName = (EditText) findViewById(R.id.category);
+
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+
+			mRowId = (extras.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_ID)) ? extras
+					.getLong(MediacatalogDataBaseSetup.KEY_CATEGORY_ID) : null;
+			_Type = (extras.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE)) ? extras
+					.getString(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE) : "";
+			_Name = (extras.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME)) ? extras
+					.getString(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME) : "";
+		}
+
+		populateFields();
+
+	}// End of method protected onCreate(Bundle)
+
+	/**
+	 * Populates fields with values from the database
+	 */
+	private void populateFields() {
+		Cursor cursor = null;
+		Bundle extras = getIntent().getExtras();
+		if (mDbHelper == null) {
+			mDbHelper = new MediacatalogDataBaseSetup(this);
+		}
+		if (mRowId != null) {
+			cursor = mDbHelper.fetchCategoryById(mRowId);
+			startManagingCursor(cursor);
+		}
+
+		// Type
+		if (_Type.equals("")) {
+			if (mRowId != null) {
+				if (!extras.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE)) {
+					_Type = cursor
+							.getString(cursor
+									.getColumnIndexOrThrow(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE));
+				} else {
+					_Type = extras.getString(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE);
+				}
+			} else {
+				_Type = (extras != null) ? (extras
+						.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE)) ? extras
+						.getString(MediacatalogDataBaseSetup.KEY_CATEGORY_TYPE) : ""
+						: "";
+			}
+		}
+		int typeIndex = 0;
+		for (int i = 0; i < mType.getCount(); i++) {
+			if (_Type.toUpperCase().equals(
+					mType.getItemAtPosition(i).toString().toUpperCase())) {
+				typeIndex = i;
+				break;
+			}
+		}
+		mType.setSelection(typeIndex);
+
+		// Name
+		if (_Name.equals("")) {
+			if (mRowId != null) {
+				if (!extras.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME)) {
+					_Name = cursor.getString(cursor
+							.getColumnIndex(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME));
+				} else {
+					_Name = extras.getString(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME);
+				}
+			} else {
+				_Name = (extras != null) ? (extras
+						.containsKey(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME)) ? extras
+						.getString(MediacatalogDataBaseSetup.KEY_CATEGORY_NAME) : ""
+						: "";
+			}
+		}
+		mName.setText(_Name);
+
+	}// End of method private void populateFields()
+
+	/**
+	 * Saves the category information to the database
+	 */
+	private void SaveCategory() {
+		String type = mType.getSelectedItem().toString();
+		String name = mName.getText().toString();
+
+		if (mRowId == null) {
+			long id = mDbHelper.createCategory(type, name);
+			if (id > 0) {
+				mRowId = id;
+			}
+		} else {
+			mDbHelper.updateCategory(mRowId, type, name);
+		}
+		setResult(RESULT_OK);
+		finish();
+	}// End of method private void SaveCategory()
+
+	/**
+	 * Deletes the current category.
+	 */
+	private void DeleteCategory() {
+		MediacatalogNotificationHelper.showYesNoAlert(this, "Confirm Deletion",
+				"Are you sure you want to delete this item?",
+				new OnClickListener() {
+
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (mDbHelper.deleteCategory(mRowId)) {
+							setResult(RESULT_OK);
+						} else {
+							setResult(RESULT_CANCELED);
+						}
+						finish();
+					}
+
+				}, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						// Do nothing
+					}
+				});
+
+	}// End of method private void DeleteCategory()
+
+	/**
+	 * Finishes this view with no changes
+	 */
+	private void CancelAction() {
+		setResult(RESULT_CANCELED);
+		finish();
+	}// End of method private void CancelAction()
+	
+}   // end of class MediacatalogEditCategory

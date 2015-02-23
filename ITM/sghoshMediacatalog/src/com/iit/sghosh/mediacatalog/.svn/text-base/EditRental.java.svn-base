@@ -1,0 +1,255 @@
+/*****************************************************************************
+ * Name..........: EditMovie
+ * 
+ * Description...: Activity for editing a movie
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 12/22/2008)
+ *                     Initial writing - Code modeled after android notepad
+ *                     example.
+ *****************************************************************************/
+package com.app.my_collection;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.DialogInterface.OnClickListener;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.provider.Contacts.People;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Spinner;
+
+/**
+ * Activity for viewing/editing a movie
+ */
+public class EditRental extends Activity {
+
+	/****************
+	 * CLASS FIELDS *
+	 ****************/
+	private Spinner mMovieId;
+	private Long _MovieId = null;
+	private Spinner mContactId = null;
+	private Long _ContactId = null;
+	private Long mRowId = null;
+	private MoviesDbAdapter mDbHelper;
+	private static final int SAVE_ID = Menu.FIRST;
+	private static final int DELETE_ID = Menu.FIRST + 1;
+	private static final int CANCEL_ID = Menu.FIRST + 2;
+
+	private void populateFields() {
+
+		if (mDbHelper == null) {
+			mDbHelper = new MoviesDbAdapter(this);
+			mDbHelper.open();
+		}
+		
+		Cursor cur_rental = null;
+		Bundle extras = getIntent().getExtras();
+		
+		if(mRowId != null ) {
+			cur_rental = mDbHelper.fetchRental(mRowId);
+			startManagingCursor(cur_rental);
+		}
+		
+		//
+		// Populate the Movie Spinner
+		if(mRowId != null) {
+			if(!extras.containsKey(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID)) {
+				_MovieId = cur_rental.getLong(cur_rental.getColumnIndexOrThrow(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID));
+			} else {
+				_MovieId = extras.getLong(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID);
+			}
+		} else {
+			_MovieId = (extras != null)
+								?(extras.containsKey(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID))?extras.getLong(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID):0
+								:0;
+		}
+		for(int i = 0; i < mMovieId.getCount(); i++) {
+			Long tmpId = mMovieId.getItemIdAtPosition(i);
+			if(tmpId.equals(_MovieId)) {
+				mMovieId.setSelection(i);
+				break;
+			}
+		}
+		//
+		// Populate the Contact Spinner
+		if(mRowId != null) {
+			if(!extras.containsKey(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID)) {
+				_ContactId = cur_rental.getLong(cur_rental.getColumnIndexOrThrow(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID));
+			} else {
+				_ContactId = extras.getLong(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID);
+			}
+		} else {
+			_ContactId = (extras != null)
+						?(extras.containsKey(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID))?extras.getLong(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID):0
+						:0;
+		}
+		for(int i = 0; i < mContactId.getCount(); i++){
+			Long tmpId = mContactId.getItemIdAtPosition(i);
+			if(tmpId.equals(_ContactId)) {
+				mContactId.setSelection(i);
+				break;
+			}
+		}
+		
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch (item.getItemId()) {
+			case DELETE_ID:
+				DeleteRental();
+				return true;
+			case SAVE_ID:
+				SaveRental();
+				return true;
+			case CANCEL_ID:
+				CancelAction();
+				return true;
+		}
+
+		return super.onMenuItemSelected(featureId, item);
+	}
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		super.onCreateOptionsMenu(menu);
+		MenuItem item = menu.add(0, SAVE_ID, 0, R.string.menu_save);
+		item.setIcon(android.R.drawable.ic_menu_save);
+		MenuItem item1 = menu.add(0, DELETE_ID, 0, R.string.menu_remove);
+		item1.setIcon(android.R.drawable.ic_menu_delete);
+		MenuItem item2 = menu.add(0, CANCEL_ID, 0, R.string.menu_cancel);
+		item2.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
+		return true;
+	}
+	@Override
+	protected void onSaveInstanceState(Bundle outState) {
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Intent intent = getIntent();
+		if(mRowId != null) {
+			intent.putExtra(MoviesDbAdapter.KEY_RENTAL_ID, mRowId);
+		}
+		if(_MovieId != null)
+			intent.putExtra(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID, _MovieId);
+		if(_ContactId != null)
+			intent.putExtra(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID, _ContactId);
+	}
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+
+		mDbHelper = new MoviesDbAdapter(this);
+		mDbHelper.open();
+
+		setContentView(R.layout.rental_edit);
+		setTitle(R.string.title_edit_rental);
+		
+		
+		//
+		// Setup the Movie spinner
+		//
+		mMovieId = (Spinner) findViewById(R.id.movie_id);
+		Cursor moviesCursor = mDbHelper.fetchAllMovies();
+		SimpleCursorAdapter movieAdapter = new SimpleCursorAdapter(this
+				,android.R.layout.simple_spinner_item
+				,moviesCursor
+				, new String[] {MoviesDbAdapter.KEY_MOVIE_TITLE}
+				, new int[] {android.R.id.text1});
+		movieAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mMovieId.setAdapter(movieAdapter);
+		
+		//
+		// Setup the contact spinner
+		//
+		mContactId = (Spinner) findViewById(R.id.contact_id);
+		Cursor contactsCursor = mDbHelper.fetchAllContacts();
+		SimpleCursorAdapter contactAdapter = new SimpleCursorAdapter(this
+				,android.R.layout.simple_spinner_item
+				,contactsCursor
+				,new String[] {People.NAME}
+				,new int[] {android.R.id.text1});
+		contactAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mContactId.setAdapter(contactAdapter);
+		
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			
+			mRowId = (extras.containsKey(MoviesDbAdapter.KEY_RENTAL_ID))?extras.getLong(MoviesDbAdapter.KEY_RENTAL_ID):null;
+			_MovieId = (extras.containsKey(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID))?extras.getLong(MoviesDbAdapter.KEY_RENTAL_MOVIE_ID):null;
+			_ContactId = (extras.containsKey(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID))?extras.getLong(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID):null;
+		}
+
+		populateFields();
+
+	}
+	
+	@Override
+	protected void onRestoreInstanceState(Bundle savedInstanceState) {
+		super.onRestoreInstanceState(savedInstanceState);
+	}
+	
+	private void SaveRental() {
+		long movie_id = mMovieId.getSelectedItemId();
+		long contact_id = mContactId.getSelectedItemId();
+		DateFormat dateFormat = new SimpleDateFormat(MoviesDbAdapter.DEFAULT_DATE_FORMAT);
+        Date date = new Date();
+		String date_out = dateFormat.format(date);
+		
+		if (mRowId == null) {
+			long id = mDbHelper.createRental(movie_id, contact_id, date_out);
+			if (id > 0) {
+				mRowId = id;
+			}
+		} else {
+			mDbHelper.updateRental(mRowId, movie_id, contact_id, date_out);
+		}
+		setResult(RESULT_OK);
+		finish();
+	}
+	
+	private void DeleteRental() {
+		NotificationHelper.showYesNoAlert(this, "Confirm Deletion"
+				, "Are you sure you want to delete this item?"
+				, new OnClickListener() {
+		
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						if (mDbHelper.deleteRental(mRowId)) {
+							setResult(RESULT_OK);
+						} else {
+							setResult(RESULT_CANCELED);
+						}
+						finish();
+					}
+				
+				}, new OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						//Do nothing
+					}
+				}
+			);
+		
+	}
+	
+	private void CancelAction() {
+		setResult(RESULT_CANCELED);
+		finish();
+	}
+}

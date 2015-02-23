@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <array name="ratings">
+    	 <item>NR</item>
+    	 <item>G</item>
+    	 <item>PG</item>
+    	 <item>PG-13</item>
+    	 <item>R</item>
+    	 <item>NC-17</item>
+    	 <item>EC</item>
+    	 <item>E</item>
+    	 <item>E-10+</item>
+    	 <item>T</item>
+    	 <item>M</item>
+    	 <item>A</item>
+    	 <item>TV-Y</item>
+    	 <item>TV-Y7</item>
+    	 <item>TV-G</item>
+    	 <item>TV-PG</item>
+    	 <item>TV-14</item>
+    	 <item>TV-MA</item>
+     </array>
+     <array name="statuses">
+    	 <item>New</item>
+    	 <item>Good</item>
+    	 <item>Poor</item>
+    	 <item>Broken</item>
+    	 <item>Rental</item>
+     </array>
+     <array name="types">
+    	 <item>Movie</item>
+    	 <item>Game</item>
+    	 <item>Book</item>
+    	 <item>CD</item>
+     </array>
+     <array name="tabs">
+    	 <item>Movie</item>
+    	 <item>Game</item>
+    	 <item>Book</item>
+    	 <item>CD</item>
+    	 <item>Loan</item>
+     </array>
+     <array name="types_movie">
+    	 <item>DVD</item>
+    	 <item>Blu-ray</item>
+    	 <item>HD-DVD</item>
+    	 <item>Laser Disk</item>
+    	 <item>VHS</item>
+    	 <item>uMD</item>
+     </array>
+     <array name="types_game">
+     	<item>Gameboy</item>
+     	<item>Game Cube</item>
+     	<item>Mac</item>
+     	<item>Nintendo DS</item>
+     	<item>PC</item>
+    	<item>PS1</item>
+    	<item>PS2</item>
+    	<item>PS3</item>
+    	<item>PSP</item>
+     	<item>Wii</item>
+     	<item>XBOX</item>
+    	<item>XBOX 360</item>
+    	<item>NES</item>
+    	<item>SNES</item>
+    	<item>N64</item>
+    	<item>Sega Master System</item>
+    	<item>Sega Genesis</item>
+    	<item>Sega Saturn</item>
+    	<item>Dreamcast</item>
+     </array>
+     <array name="types_book">
+     	<item>Hardcover</item>
+     	<item>Paperback</item>
+     	<item>Audiobook</item>
+     </array>
+     <array name="types_cd">
+     	<item>Album</item>
+     	<item>Single</item>
+     	<item>Box-Set</item>
+     </array>
+     <array name="regions">
+     	<item>English (United States)</item>
+     	<item>English (United Kingdom)</item>
+     </array>
+</resources>

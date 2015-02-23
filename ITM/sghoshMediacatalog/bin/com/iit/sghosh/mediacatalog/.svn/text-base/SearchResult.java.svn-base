@@ -1,0 +1,169 @@
+/*****************************************************************************
+ * Name..........: SearchResult
+ * 
+ * Description...: Object container for search result array
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 02/19/2009)
+ *                     Initial writing
+ *****************************************************************************/
+package com.app.my_collection;
+
+/**
+ * This class is a representation of a search result from Amazon.  It is used 
+ * in a generic List<SearchResult> object that gets passed into the view used 
+ * to allow the user to select which item they want to add when there are 
+ * multiple results.
+ * 
+ * @author Timothy A. DeWees
+ *
+ */
+public class SearchResult {
+
+	/****************
+	 * CLASS FIELDS
+	 ****************/
+	private String _title = "";
+	private String _smallUrl = "";
+	private String _largeUrl = "";
+	private String _artist = "";
+	private String _author = "";
+	private String _releaseDate = "";
+	private String _description = "";
+	private byte[] _smallImageBitmap = null;
+    private byte[] _largeImageBitmap = null;
+	
+    /*************************
+     * ACCESSORS And MUTATORS
+     *************************/
+    
+    /**
+	 * @param _title the _title to set
+	 */
+	public void setTitle(String _title) {
+		this._title = _title;
+	}//End of method public void setTitle(String)
+	
+	/**
+	 * @return the _title
+	 */
+	public String getTitle() {
+		return _title;
+	}//End of method public  String getTitle()
+	
+	/**
+	 * @param _artist the _artist to set
+	 */
+	public void setArtist(String _artist) {
+		this._artist = _artist;
+	}//End of method public void setArtist(String)
+	
+	/**
+	 * @return the _artist
+	 */
+	public String getArtist() {
+		return _artist;
+	}//End of method public String getArtist()
+	
+	/**
+	 * @param _author the _author to set
+	 */
+	public void setAuthor(String _author) {
+		this._author = _author;
+	}//End of method public void setAuthor(String)
+	
+	/**
+	 * @return the _author
+	 */
+	public String getAuthor() {
+		return _author;
+	}//End of method public String getAuthor()
+	
+	/**
+	 * @param _releaseDate the _releaseDate to set
+	 */
+	public void setReleaseDate(String _releaseDate) {
+		this._releaseDate = _releaseDate;
+	}//End of method public void setReleaseDate(String)
+	
+	/**
+	 * @return the _releaseDate
+	 */
+	public String getReleaseDate() {
+		return _releaseDate;
+	}//End of method public String getReleaseDate()
+	
+	/**
+	 * @param _smallUrl the _smallUrl to set
+	 */
+	public void setSmallUrl(String _smallUrl) {
+		this._smallUrl = _smallUrl;
+	}//End of method public void setSmallUrl(String)
+	
+	/**
+	 * @return the _smallUrl
+	 */
+	public String getSmallUrl() {
+		return _smallUrl;
+	}//End of method public String getSmallUrl()
+	
+	/**
+	 * 
+	 * @param _desc the value for description
+	 */
+	public void setDescription(String _desc) {
+		this._description = _desc;
+	}
+	/**
+	 * 
+	 * @return the description
+	 */
+	public String getDescription() {
+		return _description;
+	}
+	/**
+	 * @param _largeUrl the _largeUrl to set
+	 */
+	public void setLargeUrl(String _largeUrl) {
+		this._largeUrl = _largeUrl;
+	}//End of method public void setLargeUrl(String)
+	
+	/**
+	 * @return the _largeUrl
+	 */
+	public String getLargeUrl() {
+		return _largeUrl;
+	}//End of method public String getLargeUrl()
+	
+	/**
+	 * @param _smallImageBitmap the _smallImageBitmap to set
+	 */
+	public void setSmallImageBitmap(byte[] _smallImageBitmap) {
+		this._smallImageBitmap = _smallImageBitmap;
+	}//End of method public void setSmallImageBitmap(byte[])
+	
+	/**
+	 * @return the _smallImageBitmap
+	 */
+	public byte[] getSmallImageBitmap() {
+		return _smallImageBitmap;
+	}//End of method public byte[] getSmallImageBitmat()
+	
+	/**
+	 * @param _largeImageBitmap the _largeImageBitmap to set
+	 */
+	public void setLargeImageBitmap(byte[] _largeImageBitmap) {
+		this._largeImageBitmap = _largeImageBitmap;
+	}//End of method public void setLargeImageBitmat(byte[])
+	
+	/**
+	 * @return the _largeImageBitmap
+	 */
+	public byte[] getLargeImageBitmap() {
+		return _largeImageBitmap;
+	}//End of method public byte[] getLargeImageBitmat()
+    
+}//End of class SearchResult

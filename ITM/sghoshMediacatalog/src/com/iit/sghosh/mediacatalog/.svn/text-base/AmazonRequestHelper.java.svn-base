@@ -1,0 +1,80 @@
+/*****************************************************************************
+ * Name..........: AmazonRequestHelper
+ * 
+ * Description...: Helper class for calling Amazon web service requests
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 03/01/2009)
+ *                     Initial writing
+ *****************************************************************************/
+package com.app.my_collection;
+
+import java.io.IOException;
+import java.util.List;
+
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.DefaultHttpClient;
+
+/**
+ * This class is a helper for calling Amazon web service requests.
+ * 
+ * @author tim
+ *
+ */
+public class AmazonRequestHelper {
+
+	private String _SearchUrl = "";
+	
+	/**
+	 * The constructor for the object
+	 * @param url The URL to use
+	 */
+	public AmazonRequestHelper(String url) {
+		this.setSearchUrl(url);
+	}//End of constructor AmazonRequestHelper(String, Object[])
+	
+	/**
+	 * This method will perform the Amazon web service item lookup
+	 * call and return the results
+	 * 
+	 * @return XML content of response for service call
+	 */
+	public List<SearchResult> performAmazonServiceLookup() throws ClientProtocolException,IOException  {
+		
+		//Create client and GET request
+		HttpClient client = new DefaultHttpClient();
+		HttpGet request = new HttpGet(this.getSearchUrl());
+              
+        //Call web service
+        ResponseHandler<String> responseHandler = new BasicResponseHandler();
+        String responseBody = "";
+        responseBody = client.execute(request, responseHandler);
+        
+        //Parse and return results
+        AmazonResponseHelper response = new AmazonResponseHelper();
+        return response.parseResults(responseBody);
+        
+	}//End of public method performAmazonServiceLookup
+
+	/**
+	 * @param _SearchUrl the _SearchUrl to set
+	 */
+	public void setSearchUrl(String _SearchUrl) {
+		this._SearchUrl = _SearchUrl;
+	}
+
+	/**
+	 * @return the _SearchUrl
+	 */
+	public String getSearchUrl() {
+		return _SearchUrl;
+	}
+
+}//End of class AmazonRequestHelper

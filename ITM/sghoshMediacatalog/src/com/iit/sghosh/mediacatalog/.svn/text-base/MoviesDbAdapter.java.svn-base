@@ -1,0 +1,1157 @@
+/*****************************************************************************
+ * Name..........: MoviesDbAdapter
+ * 
+ * Description...: Helper class used to create, and use the SQL Lite database
+ *                 that the application uses to store movies
+ *
+ * Author........: Timothy A. DeWees
+ * 
+ * Version.......: 1.0
+ * 
+ * Change History: 1.0 (Timothy A. DeWees - 12/22/2008)
+ *                     Initial writing - Code modeled after android notepad
+ *                     example.
+ *****************************************************************************/
+package com.app.my_collection;
+
+import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import android.app.Activity;
+import android.content.ContentUris;
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.net.Uri;
+import android.provider.Contacts.People;
+import android.util.Log;
+
+
+/**
+ * Simple movies database access helper class. Defines the basic CRUD operations
+ * for the MyMovies application, and gives the ability to list all notes as well
+ * as retrieve, modify, or remove a specific movie.
+ */
+public class MoviesDbAdapter {
+
+	/****************
+	 * CLASS FIELDS *
+	 ****************/
+	private static final String TAG = "MoviesDbAdapter";
+	private DatabaseHelper mDbHelper;
+	private SQLiteDatabase mDb;
+	public static final String DEFAULT_DATE_FORMAT = "MM/dd/yy HH:mm:ss";
+	public static final String KEY_MOVIE_FILTER_TYPE = "FilterType";
+	public static final String KEY_MOVIE_ID = "_id";
+	public static final String KEY_MOVIE_TITLE = "title";
+	public static final String KEY_MOVIE_CATEGORY = "category";
+	public static final String KEY_MOVIE_CATEGORY_ID = "category_id";
+	public static final String KEY_MOVIE_RATING = "rating";
+	public static final String KEY_MOVIE_STATUS = "status";
+	public static final String KEY_MOVIE_TYPE = "type";
+	public static final String KEY_MOVIE_SUBTYPE = "subtype";
+	public static final String KEY_MOVIE_RANK = "rank";
+	public static final String KEY_MOVIE_UPC = "upc";
+	public static final String KEY_MOVIE_SMALL_IMAGE = "image_small";
+	public static final String KEY_MOVIE_LARGE_IMAGE = "image_large";
+	public static final String KEY_MOVIE_IMAGE_URL = "image_url";
+	public static final String KEY_MOVIE_TITLE_SORTABLE = "title_sortable";
+	public static final String KEY_MOVIE_AUTHOR = "author";
+	public static final String KEY_MOVIE_ARTIST = "artist";
+	public static final String KEY_MOVIE_YEAR = "year";
+	public static final String KEY_RENTAL_ID = "_id";
+	public static final String KEY_RENTAL_MOVIE_ID = "movie_id";
+	public static final String KEY_RENTAL_DATE_OUT = "date_out";
+	public static final String KEY_RENTAL_DATE_IN = "date_in";
+	public static final String KEY_RENTAL_CONTACT_ID = "contact_id";
+	public static final String KEY_CATEGORY_ID = "_id";
+	public static final String KEY_CATEGORY_NAME = "name";
+	public static final String KEY_CATEGORY_TYPE = "type";
+	private static final String DATABASE_CREATE_MOVIES = "CREATE TABLE movies ("
+			+ "_id integer primary key autoincrement "
+			+ ", title text not null "
+			+ ", category text not null DEFAULT 'Unassigned' "
+			+ ", category_id integer null "
+			+ ", rating text not null DEFAULT 'PG' "
+			+ ", rank integer not null DEFAULT 1 "
+			+ ", status text not null " 
+			+ ", type text not null "
+			+ ", subtype text not null "
+			+ ", upc text null " 
+			+ ", image_small blob null " 
+			+ ", image_large blob null "
+			+ ", title_sortable text null "
+			+ ", artist text null " 
+			+ ", author text null "
+			+ ", year text null "
+			+ ", image_url text null "
+			+ ");";
+	private static final String DATABASE_CREATE_RENTALS = "CREATE TABLE rentals ("
+			+ "_id integer primary key autoincrement "
+			+ ", movie_id integer not null "
+			+ ", date_out text not null "
+			+ ", date_in text null "
+			+ ", contact_id integer not null " 
+			+ ");";
+	private static final String DATABASE_CREATE_CATEGORIES = "CREATE TABLE categories ("
+		+ "_id integer primary key autoincrement "
+		+ ", name text not null "
+		+ ", type text not null "
+		+ ");";
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_2_TO_3 = {
+		"ALTER TABLE movies ADD COLUMN category TEXT NOT NULL DEFAULT 'Unassigned';"
+		,"ALTER TABLE movies ADD COLUMN rank integer NOT NULL DEFAULT 1;"
+		,"UPDATE movies SET type='Blu-Ray' WHERE type='BlueRay';"
+	};
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_3_TO_4 = {
+		"ALTER TABLE movies ADD COLUMN upc TEXT NULL;"
+		,"ALTER TABLE movies ADD COLUMN image_small BLOB NULL;"
+		,"ALTER TABLE movies ADD COLUMN image_large BLOB NULL;"
+	};
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_4_OR_5_TO_6 = {
+		"ALTER TABLE movies ADD COLUMN category_id integer NULL;"
+		,"ALTER TABLE movies ADD COLUMN subtype text NULL;"
+		,"UPDATE movies SET subtype='Blu-ray' WHERE type='Blu-ray';"
+		,"UPDATE movies SET type='Movie' WHERE subtype='Blu-ray';"
+		,"UPDATE movies SET subtype='DVD' WHERE type='DVD';"
+		,"UPDATE movies SET type='Movie' WHERE subtype='DVD';"
+	};
+	
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_6_TO_7 = {
+		"UPDATE movies SET subtype='Blu-ray' WHERE type='Blu-Ray';"
+		,"UPDATE movies SET type='Movie' WHERE subtype='Blu-ray';"
+	};
+	
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_7_TO_8 = {
+		"ALTER TABLE movies ADD COLUMN title_sortable text NULL;"
+	};
+	
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_8_TO_9 = {
+		"ALTER TABLE movies ADD COLUMN artist text NULL;"
+		,"ALTER TABLE movies ADD COLUMN author text NULL;"
+	};
+	
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_9_TO_10 = {
+		"ALTER TABLE movies ADD COLUMN year text NULL;"
+	};
+	
+	private static final String[] DATABASE_UPGRADE_MOVIES_FROM_10_TO_11 = {
+		"ALTER TABLE movies ADD COLUMN image_url text NULL;"
+	};
+	
+	private static final String[] DATABASE_UPGRADE_MOVIES_INSERT_CATEGORIES = {
+		"INSERT INTO categories (name, type) VALUES ('Unassigned', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Action', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Adventure', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Animation', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Biography', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Comedy', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Crime', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Documentary', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Drama', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Family', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Fantasy', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Film-Noir', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Game-Show', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('History', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Horror', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Music', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Musical', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Mystery', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('News', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Reality-TV', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Romance', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Sci-Fi', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Short', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Sport', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Talk-Show', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Thriller', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('War', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Western', 'Movie');"
+		,"INSERT INTO categories (name, type) VALUES ('Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Action Adventure', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Action Compilation', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Action RPG', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Action Simulation', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Adventure', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Board', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Card', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Casino', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Educational Puzzle', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Fighting', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Fighting Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Fighting Adventure', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('First Person Shooter', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Flight Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Hunting', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Music', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Music Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Party', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Pinball', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Platformer', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Puzzle', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Puzzle Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Puzzle Word Games', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('RPG', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Racing', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Racing Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Racing Simulation', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Shooter', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Simulation', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Sports', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Sports Action', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Sports Simulation', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Strategy', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Trivia', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Virtual Pet', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Wrestling', 'Game');"
+		,"INSERT INTO categories (name, type) VALUES ('Arts & Photography', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Biographies & Memoirs', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Business & Investing', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Calendars', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Childrens Books', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Comics & Graphic Novels', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Computers & Internet', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Cooking, Food & Wine', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Entertainment', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Gay & Lesbian', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Health, Mind & Body', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('History', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Home & Garden', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Law', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Literature & Fiction', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Medicine', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Mystery & Thrillers', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Nonfiction', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Outdoors & Nature', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Parenting & Families', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Professional & Technical', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Reference', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Religion & Spirituality', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Romance', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Science', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Science Fiction & Fantasy', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Sports', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Teens', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Travel', 'Book');"
+		,"INSERT INTO categories (name, type) VALUES ('Alternative Rock', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Blues', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Broadway & Vocalists', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Childrens', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Christian & Gospel', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Classical', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Country', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Dance & Electronica', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Folk', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Hard Rock & Metal', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Hawaiian', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Imports', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Indie Music', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Jazz', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Latin', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Miscellaneous', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('New Age', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Opera & Vocal Music', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Pop', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('R&B & Soul', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Rap & Hip-Hop', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Rock', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Soundtracks', 'CD');"
+		,"INSERT INTO categories (name, type) VALUES ('Word Music', 'CD');"
+	};
+	private static final String DATABASE_NAME = "my_movies";
+	private static final String DATABASE_SDCARD_ROOT_PATH = "/sdcard/my_collection";
+	private static final String DATABASE_MOVIE_TABLE = "movies";
+	private static final String DATABASE_RENTAL_TABLE = "rentals";
+	private static final String DATABASE_CATEGORY_TABLE = "categories";
+	private static final int DATABASE_VERSION = 11;
+	private final Context mCtx;
+
+	/**
+	 * Private nested class used to initialize the database
+	 */
+	private static class DatabaseHelper extends SQLiteOpenHelper {
+
+		DatabaseHelper(Context context) {
+			super(context, DATABASE_NAME, null, DATABASE_VERSION);
+		}
+
+		@Override
+		public SQLiteDatabase getReadableDatabase() {
+			
+			File dbFile = new File(DATABASE_SDCARD_ROOT_PATH + "/" + DATABASE_NAME);
+			
+			boolean fileExisted = dbFile.exists();
+			if(!dbFile.canRead()) {
+				return super.getReadableDatabase();
+			}
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+			if(!fileExisted){
+				onCreate(db);
+				db.setVersion(DATABASE_VERSION);
+			} else {
+				if(db.getVersion() < DATABASE_VERSION) {
+					onUpgrade(db, db.getVersion(), DATABASE_VERSION);
+				}
+			}
+			
+			return db;
+		}
+		
+		@Override
+		public SQLiteDatabase getWritableDatabase() {
+			
+			File dbFile = new File(DATABASE_SDCARD_ROOT_PATH + "/" + DATABASE_NAME);
+			
+			boolean fileExisted = dbFile.exists();
+			if(!dbFile.canWrite()) {
+				return super.getWritableDatabase();
+			}
+			SQLiteDatabase db = SQLiteDatabase.openOrCreateDatabase(dbFile, null);
+			
+			if(!fileExisted){
+				onCreate(db);
+				db.setVersion(DATABASE_VERSION);
+			} else {
+				if(db.getVersion() < DATABASE_VERSION) {
+					onUpgrade(db, db.getVersion(), DATABASE_VERSION);
+					db.setVersion(DATABASE_VERSION);
+				}
+			}
+			
+			return db;
+		}
+		
+		@Override
+		public void onCreate(SQLiteDatabase db) {
+
+			db.execSQL(DATABASE_CREATE_MOVIES);
+			db.execSQL(DATABASE_CREATE_RENTALS);
+			db.execSQL(DATABASE_CREATE_CATEGORIES);
+			//Seed categories table
+			for(int i = 0; i < DATABASE_UPGRADE_MOVIES_INSERT_CATEGORIES.length; i++) {
+				db.execSQL(DATABASE_UPGRADE_MOVIES_INSERT_CATEGORIES[i]);
+			}
+		}
+
+		@Override
+		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+			Log.w(TAG, "Upgrading database from version " + oldVersion + " to "
+					+ newVersion + ", which will destroy all old data");
+			if(oldVersion <= 2) {
+				//Perform alters on movies table
+				try {
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_2_TO_3.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_2_TO_3[i]);
+					}
+					db.setVersion(3);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+				
+			}
+			if(oldVersion <= 3 ){
+				try {
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_3_TO_4.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_3_TO_4[i]);
+					}
+					db.setVersion(4);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			} 
+				
+			if(oldVersion <= 5) {
+				try {
+					//Create new categories table
+					db.execSQL(DATABASE_CREATE_CATEGORIES);
+					
+					//Alter movies and add records to categories
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_4_OR_5_TO_6.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_4_OR_5_TO_6[i]);
+					}
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_INSERT_CATEGORIES.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_INSERT_CATEGORIES[i]);
+					}
+					db.setVersion(6);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			}
+			
+			if(oldVersion <= 6) {
+				try {
+					//Alter movies and add records to categories
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_6_TO_7.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_6_TO_7[i]);
+					}
+					db.setVersion(7);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			}
+			
+			if(oldVersion <= 7) {
+				try {
+					//Alter movies and add title_sortable
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_7_TO_8.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_7_TO_8[i]);
+					}
+					db.setVersion(8);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			}
+			if(oldVersion <= 8) {
+				try {
+					//Alter movies and add title_sortable
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_8_TO_9.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_8_TO_9[i]);
+					}
+					db.setVersion(9);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			}
+			
+			if(oldVersion <= 9) {
+				try {
+					//Alter movies and add title_sortable
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_9_TO_10.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_9_TO_10[i]);
+					}
+					db.setVersion(10);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			}
+			
+			if(oldVersion <= 10) {
+				try {
+					//Alter movies and add title_sortable
+					for(int i = 0; i < DATABASE_UPGRADE_MOVIES_FROM_10_TO_11.length; i++) {
+						db.execSQL(DATABASE_UPGRADE_MOVIES_FROM_10_TO_11[i]);
+					}
+					db.setVersion(10);
+				} catch(Exception ex) {
+					android.util.Log.v("DATABASE_UPGRADE_ERROR", ex.getMessage());
+				}
+			}
+		}
+	}// End of private static class DatabaseHelper
+
+	/**
+	 * Constructor - takes the context to allow the database to be
+	 * opened/created
+	 * 
+	 * @param ctx
+	 *            the Context within which to work
+	 */
+	public MoviesDbAdapter(Context ctx) {
+		this.mCtx = ctx;
+	}
+
+	/**
+	 * Open the movies database. If it cannot be opened, try to create a new
+	 * instance of the database. If it cannot be created, throw an exception to
+	 * signal the failure
+	 * 
+	 * @return this (self reference, allowing this to be chained in an
+	 *         initialization call)
+	 * @throws SQLException
+	 *             if the database could be neither opened or created
+	 */
+	public MoviesDbAdapter open() throws SQLException {
+		mDbHelper = new DatabaseHelper(mCtx);
+		mDb = mDbHelper.getWritableDatabase();
+		return this;
+	}
+
+	/**
+	 * Verifies that the database connection is still valid
+	 * 
+	 */
+	private void VerifyDbConnection()
+	{
+		if(mDb == null || !mDb.isOpen())
+		{
+			this.open();
+		}
+	}
+	
+	public void close() {
+		mDbHelper.close();
+	}
+
+	/**
+	 * Return a Cursor over the list of all movies in the database
+	 * 
+	 * @return Cursor over all notes
+	 */
+	public Cursor fetchAllMovies() {
+
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String query = "SELECT "
+			+ "M." + KEY_MOVIE_ID
+			+ ", M." + KEY_MOVIE_TITLE
+			+ ", M." + KEY_MOVIE_RATING
+			+ ", C." + KEY_CATEGORY_NAME
+			+ ", M." + KEY_MOVIE_STATUS
+			+ ", M." + KEY_MOVIE_TYPE
+			+ ", M." + KEY_MOVIE_SUBTYPE
+			+ ", M." + KEY_MOVIE_RANK
+			+ ", M." + KEY_MOVIE_SMALL_IMAGE
+			+ ", M." + KEY_MOVIE_ARTIST
+			+ ", M." + KEY_MOVIE_AUTHOR
+			+ ", M." + KEY_MOVIE_UPC
+			+ ", M." + KEY_MOVIE_YEAR
+			+ ", M." + KEY_MOVIE_IMAGE_URL
+			+ ", CASE WHEN substr(upper(M.title), 0, 2) = 'A ' THEN substr(M.title, 3) ELSE CASE WHEN substr(upper(M.title), 0, 4) = 'THE ' THEN substr(M.title, 5) ELSE M.title END END AS sortable"
+			+ " FROM " + DATABASE_MOVIE_TABLE + " AS M"
+			+ " LEFT JOIN " + DATABASE_CATEGORY_TABLE + " AS C ON (M." + KEY_MOVIE_CATEGORY_ID + " = C." + KEY_CATEGORY_ID + ")"
+			+ " ORDER BY sortable";
+		return mDb.rawQuery(query, null);
+	}
+	
+	/**
+	 * Return a Cursor positioned at the movie that matches the given rowId
+	 * 
+	 * @param rowId id of note to retrieve
+	 * @return Cursor positioned to matching note, if found
+	 * @throws SQLException if note could not be found/retrieved
+	 */
+	public Cursor fetchMovie(long rowId) throws SQLException {
+
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Cursor mCursor = mDb.query(true, DATABASE_MOVIE_TABLE, new String[] { KEY_MOVIE_ID, KEY_MOVIE_TITLE,
+			KEY_MOVIE_RATING, KEY_MOVIE_CATEGORY_ID, KEY_MOVIE_STATUS, KEY_MOVIE_TYPE, KEY_MOVIE_SUBTYPE
+			, KEY_MOVIE_RANK , KEY_MOVIE_UPC, KEY_MOVIE_SMALL_IMAGE, KEY_MOVIE_LARGE_IMAGE
+			, KEY_MOVIE_AUTHOR, KEY_MOVIE_ARTIST, KEY_MOVIE_YEAR, KEY_MOVIE_IMAGE_URL}
+			, KEY_MOVIE_ID + "=" + rowId, null,	null, null, null, null);
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+
+	}//End of public Cursor method fetchMovie(long)
+
+	/**
+	 * Retrieves the movie title based on the passed movieId
+	 * 
+	 * @param movieId Uniquely identifies the movie
+	 * @return Returns the title
+	 */
+	public String fetchMovieTitleByMovieId(long movieId) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String title = "";
+		try {
+			Cursor mCursor = mDb.query(true, DATABASE_MOVIE_TABLE, new String[] { KEY_MOVIE_TITLE }
+				, KEY_MOVIE_ID + "=" + movieId, null, null, null, null, null);
+			if (mCursor != null) {
+				mCursor.moveToFirst();
+				title = mCursor.getString(mCursor.getColumnIndex(KEY_MOVIE_TITLE));
+			}
+		} catch (Exception ex) {
+			android.util.Log.v("FETCH_MOVIE_TITLE_ERROR", ex.getMessage());
+		}
+		return title;
+	}//End of method public String fetchMovieTitleByMovieId(long)
+	
+	/**
+	 * Return a Cursor over the list of all movies in the database
+	 * 
+	 * @param String The type of movies we want returned
+	 * @return Cursor over all notes
+	 */
+	public Cursor fetchAllMovies(String type) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String sort = "";
+		if(type.trim().toUpperCase().equals("MOVIE") ||
+				type.trim().toUpperCase().equals("GAME")) {
+			sort = "sortable ASC"; 
+		} else if (type.trim().toUpperCase().equals("CD")) {
+			sort = KEY_MOVIE_ARTIST + " ASC " +
+				"," + "sortable ASC";
+		} else if (type.trim().toUpperCase().equals("BOOK")) {
+			sort = KEY_MOVIE_AUTHOR + " ASC " +
+			"," + "sortable ASC";
+		}
+		String query = "SELECT "
+			+ "M." + KEY_MOVIE_ID
+			+ ", M." + KEY_MOVIE_TITLE
+			+ ", M." + KEY_MOVIE_RATING
+			+ ", C." + KEY_CATEGORY_NAME
+			+ ", M." + KEY_MOVIE_STATUS
+			+ ", M." + KEY_MOVIE_TYPE
+			+ ", M." + KEY_MOVIE_SUBTYPE
+			+ ", M." + KEY_MOVIE_RANK
+			+ ", M." + KEY_MOVIE_SMALL_IMAGE
+			+ ", M." + KEY_MOVIE_ARTIST
+			+ ", M." + KEY_MOVIE_AUTHOR
+			+ ", M." + KEY_MOVIE_IMAGE_URL
+			+ ", CASE WHEN substr(upper(M.title), 0, 2) = 'A ' THEN substr(M.title, 3) ELSE CASE WHEN substr(upper(M.title), 0, 4) = 'THE ' THEN substr(M.title, 5) ELSE M.title END END AS sortable"
+			+ " FROM " + DATABASE_MOVIE_TABLE + " AS M"
+			+ " LEFT JOIN " + DATABASE_CATEGORY_TABLE + " AS C ON (M." + KEY_MOVIE_CATEGORY_ID + " = C." + KEY_CATEGORY_ID + ")"
+			+ " WHERE M." + KEY_MOVIE_TYPE + "=? "
+			+ " ORDER BY " + sort;
+		return mDb.rawQuery(query, new String[] {type});
+	}//End of method public Cursor fetchAllMovies(String)
+	
+	/**
+	 * Retrieves the count of items in the database by type
+	 * 
+	 * @param type
+	 * @return Count of the items for the specified type
+	 */
+	public int fetchItemCountByType(String type) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		int count = 0;
+		try {
+			String query = "SELECT COUNT(*) FROM " + DATABASE_MOVIE_TABLE + " WHERE Type=?";
+			Cursor cursor = mDb.rawQuery(query, new String[] {type});
+			if(cursor != null) {
+				cursor.moveToFirst();
+				count = cursor.getInt(0);
+			}
+		} catch(Exception ex) {
+			android.util.Log.v("QUERY ERROR", ex.getMessage());
+		}
+		return count;
+	}//End of method fetchItemCountByType
+
+	/**
+	 * This method allows the filtering of the movies by title
+	 * 
+	 * @param title The title expression we are filtering on
+	 * @return A cursor to the results
+	 */
+	public Cursor fetchAllMoviesByTitle(String title, String type) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String sort = "";
+		if(type.trim().toUpperCase().equals("MOVIE") ||
+				type.trim().toUpperCase().equals("GAME")) {
+			sort = KEY_MOVIE_TITLE + " ASC"; 
+		} else if (type.trim().toUpperCase().equals("CD")) {
+			sort = KEY_MOVIE_ARTIST + " ASC " +
+				"," + KEY_MOVIE_TITLE + " ASC";
+		} else if (type.trim().toUpperCase().equals("BOOK")) {
+			sort = KEY_MOVIE_AUTHOR + " ASC " +
+			"," + KEY_MOVIE_TITLE + " ASC";
+		}
+		String query = "SELECT "
+			+ "M." + KEY_MOVIE_ID
+			+ ", M." + KEY_MOVIE_TITLE
+			+ ", M." + KEY_MOVIE_RATING
+			+ ", C." + KEY_CATEGORY_NAME
+			+ ", M." + KEY_MOVIE_STATUS
+			+ ", M." + KEY_MOVIE_TYPE
+			+ ", M." + KEY_MOVIE_SUBTYPE
+			+ ", M." + KEY_MOVIE_RANK
+			+ ", M." + KEY_MOVIE_SMALL_IMAGE
+			+ ", M." + KEY_MOVIE_ARTIST
+			+ ", M." + KEY_MOVIE_AUTHOR
+			+ ", M." + KEY_MOVIE_IMAGE_URL
+			+ ", CASE WHEN substr(upper(M.title), 0, 2) = 'A ' THEN substr(M.title, 3) ELSE CASE WHEN substr(upper(M.title), 0, 4) = 'THE ' THEN substr(M.title, 5) ELSE M.title END END AS sortable"
+			+ " FROM " + DATABASE_MOVIE_TABLE + " AS M"
+			+ " LEFT JOIN " + DATABASE_CATEGORY_TABLE + " AS C ON (M." + KEY_MOVIE_CATEGORY_ID + " = C." + KEY_CATEGORY_ID + ")"
+			+ " WHERE M." + KEY_MOVIE_TYPE + "=? "
+			+ " AND M." + KEY_MOVIE_TITLE + " LIKE '%" + title + "%' "
+			+ " ORDER BY " + sort;
+		return mDb.rawQuery(query, new String[] {type});
+		
+	}
+	
+	/**
+	 * Create a new movie using the properties provided. If the movie is
+	 * successfully created return the new rowId for that movie, otherwise
+	 * return a -1 to indicate failure.
+	 * 
+	 * @param title value to set movie title to
+	 * @param rating value to set movie rating to
+	 * @param status value to set the movie status to
+	 * @param type value to set the movie type to
+	 * @return rowId or -1 if failed
+	 */
+	public long createMovie(String title, String rating, Long category_id, String status
+			,String type, String subtype, int rank, String UPC, byte[] largeImage
+			, byte[] smallImage, String artist, String author, String year, String imageUrl) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		ContentValues initialValues = new ContentValues();
+		initialValues.put(KEY_MOVIE_TITLE, title.trim());
+		initialValues.put(KEY_MOVIE_STATUS, status);
+		initialValues.put(KEY_MOVIE_RATING, rating);
+		initialValues.put(KEY_MOVIE_CATEGORY_ID, category_id);
+		initialValues.put(KEY_MOVIE_TYPE, type);
+		initialValues.put(KEY_MOVIE_SUBTYPE, subtype);
+		initialValues.put(KEY_MOVIE_RANK, rank);
+		initialValues.put(KEY_MOVIE_UPC, UPC);
+		initialValues.put(KEY_MOVIE_LARGE_IMAGE, largeImage);
+		initialValues.put(KEY_MOVIE_SMALL_IMAGE, smallImage);
+		initialValues.put(KEY_MOVIE_ARTIST, artist);
+		initialValues.put(KEY_MOVIE_AUTHOR, author);
+		initialValues.put(KEY_MOVIE_YEAR, year);
+		initialValues.put(KEY_MOVIE_IMAGE_URL, imageUrl);
+		return mDb.insert(DATABASE_MOVIE_TABLE, null, initialValues);
+	}
+
+	/**
+	 * Delete the movie with the given rowId
+	 * 
+	 * @param rowId
+	 *            id of movie to delete
+	 * @return true if deleted, false otherwise
+	 */
+	public boolean deleteMovie(long rowId) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		return mDb.delete(DATABASE_MOVIE_TABLE, KEY_MOVIE_ID + "=" + rowId, null) > 0;
+	}//End of method public boolean deleteMovie(long)
+	
+	/**
+	 * Update the movie using the details provided. The note to be updated is
+	 * specified using the rowId, and it is altered to use the title and body
+	 * values passed in
+	 * 
+	 * @param rowId id of note to update
+	 * @param title value to set movie title to
+	 * @param rating value to set movie rating to
+	 * @param status value to set the movie status to
+	 * @param type value to set the movie type to
+	 * @return true if the note was successfully updated, false otherwise
+	 */
+	public boolean updateMovie(long rowId, String title, String rating, Long category_id
+			,String status, String type, String subtype, int rank, String UPC
+			, byte[] largeImage, byte[] smallImage, String artist, String author, String year
+			, String imageUrl) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		ContentValues args = new ContentValues();
+		args.put(KEY_MOVIE_TITLE, title.trim());
+		args.put(KEY_MOVIE_RATING, rating);
+		args.put(KEY_MOVIE_CATEGORY_ID, category_id);
+		args.put(KEY_MOVIE_STATUS, status);
+		args.put(KEY_MOVIE_TYPE, type);
+		args.put(KEY_MOVIE_SUBTYPE, subtype);
+		args.put(KEY_MOVIE_RANK, rank);
+		args.put(KEY_MOVIE_UPC, UPC);
+		args.put(KEY_MOVIE_LARGE_IMAGE, largeImage);
+		args.put(KEY_MOVIE_SMALL_IMAGE, smallImage);
+		args.put(KEY_MOVIE_ARTIST, artist);
+		args.put(KEY_MOVIE_AUTHOR, author);
+		args.put(KEY_MOVIE_YEAR, year);
+		args.put(KEY_MOVIE_IMAGE_URL, imageUrl);
+		return mDb.update(DATABASE_MOVIE_TABLE, args, KEY_MOVIE_ID + "=" + rowId, null) > 0;
+		
+	}//End of public boolean method updateMovie(long, String, String, String, String, String)
+
+	//////////////////////////////////////////////////////////////
+	///////////////////// CONTACT METHODS ////////////////////////
+	//////////////////////////////////////////////////////////////
+	
+	/**
+	 * This method will return all of the contacts currently stored in the contacts
+	 * database.  This is used in conjunction with rentals
+	 * 
+	 * @return A cursor pointing to the contacts records
+	 */
+	public Cursor fetchAllContacts() {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String[] projection = new String[] {
+		    People._ID,
+		    People.NAME
+		};
+		Activity act = (Activity)mCtx;
+		
+		// Best way to retrieve a query; returns a managed query.
+		Cursor managedCursor = null;
+		try {
+			managedCursor = act.managedQuery( People.CONTENT_URI,
+		                        projection, // Which columns to return
+		                        People.NAME + " IS NOT NULL",       // WHERE clause; which rows to return (all rows)
+		                        null,       // WHERE clause selection arguments (none)
+		                        People.NAME + " ASC"); // Order-by clause (ascending by name)
+			
+		} catch (Exception ex) {
+			android.util.Log.v("FETCH_CONTACTS_ERROR", ex.getMessage());
+		}
+		return managedCursor;
+		
+	}//End of public Cursor method getAllContacts
+	
+	/**
+	 * This method will fetch the Contact name from the contacts database based
+	 * on the id of that contact.
+	 *  
+	 * @param id Identifies the contact
+	 * @return The contact's name
+	 */
+	public String fetchContactNameByContactId(long id) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String contactName = "";
+		
+		try {
+		Activity act = (Activity)mCtx;
+		
+		// Get the base URI for People table in Contacts content provider.
+		// ie. content://contacts/people/
+		Uri myPerson = ContentUris.withAppendedId(People.CONTENT_URI, id);
+		// Query for this record.
+		Cursor managedCursor = act.managedQuery(myPerson, null, null, null, null);
+
+		
+		if(managedCursor != null) {
+			managedCursor.moveToFirst();
+			contactName = managedCursor.getString(managedCursor.getColumnIndex(People.NAME));
+			contactName = (contactName == null)?"Name Not Available":contactName;
+		}
+		} catch(Exception ex) {
+			android.util.Log.v("DATABASE ERROR", ex.getMessage());
+		}
+		return contactName;
+	}//End of public String method fetchContactNameByContactId(long)
+	
+	/**
+	 * Returns the name of the contact who a movie was loaned to
+	 * 
+	 * @param id The MovieId
+	 * @return The name of the contact if exists or null
+	 */
+	public String fetchMovieLoanedTo(long id) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String contact = null;
+		try {
+			Cursor mCursor = mDb.query(true, DATABASE_RENTAL_TABLE, 
+					new String[] { KEY_RENTAL_CONTACT_ID }
+					, MoviesDbAdapter.KEY_RENTAL_DATE_IN + " IS NULL "
+					+ " AND " + MoviesDbAdapter.KEY_RENTAL_MOVIE_ID + " = " + id, null
+					, null, null, null, null);
+			if(mCursor != null) {
+				mCursor.moveToFirst();
+				long contact_id = mCursor.getLong(mCursor.getColumnIndex(MoviesDbAdapter.KEY_RENTAL_CONTACT_ID));
+				contact = fetchContactNameByContactId(contact_id);
+			}
+		} catch (Exception ex) {
+			contact = null;
+		}
+		return contact;
+	}//End of method public String fetchMovieLoanedTo(long)
+	
+	//////////////////////////////////////////////////////////////
+	///////////////////// RENTAL METHODS /////////////////////////
+	//////////////////////////////////////////////////////////////
+	
+	/**
+	 * This method retrieves all rental records from the database
+	 * 
+	 * @return A cursor to the results
+	 */
+	public Cursor fetchAllRentals() {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Cursor mCursor = mDb.query(true, DATABASE_RENTAL_TABLE, 
+			new String[] { KEY_RENTAL_ID, KEY_RENTAL_MOVIE_ID, KEY_RENTAL_CONTACT_ID, 
+			KEY_RENTAL_DATE_OUT, KEY_RENTAL_DATE_IN }
+			, MoviesDbAdapter.KEY_RENTAL_DATE_IN + " IS NULL", null, null, null, null, null);
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+		
+	}//End of public Cursor method fetchAllRentals();
+	
+	/**
+	 * This method retrieves all rental records from the database
+	 * 
+	 * @return A cursor to the results
+	 */
+	public Cursor fetchRental(long rentalId) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Cursor mCursor = mDb.query(true, DATABASE_RENTAL_TABLE, 
+			new String[] { KEY_RENTAL_ID, KEY_RENTAL_MOVIE_ID, KEY_RENTAL_CONTACT_ID, 
+			KEY_RENTAL_DATE_OUT, KEY_RENTAL_DATE_IN }
+			, MoviesDbAdapter.KEY_RENTAL_ID + "=" + rentalId , null, null, null, null, null);
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+		
+	}//End of public Cursor method fetchAllRentals();
+	
+	/**
+	 * Create a rental in the database
+	 * 
+	 * @param movie_id Identifies the movie that is being rented
+	 * @param contact_id Identifies the contact that is renting the movie
+	 * @param date_out Identifies the date the movie was rented
+	 * @return The ID of the newly created rental
+	 */
+	public long createRental(long movie_id, long contact_id, String date_out) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		ContentValues initialValues = new ContentValues();
+		initialValues.put(KEY_RENTAL_MOVIE_ID, movie_id);
+		initialValues.put(KEY_RENTAL_CONTACT_ID, contact_id);
+		initialValues.put(KEY_RENTAL_DATE_OUT, date_out);
+		
+		return mDb.insert(DATABASE_RENTAL_TABLE, null, initialValues);
+	}//End of method public long createRental(long, long, String)
+	
+	/**
+	 * Updates the values for a given rental row
+	 * 
+	 * @param rowId Uniquely identifies a rental
+	 * @param movie_id Identifies the movie that is being rented
+	 * @param contact_id Identifies the contact that is renting the movie
+	 * @param date_out Identifies the date the movie was rented
+	 * @return True if a record was updated, false if not
+	 */
+	public boolean updateRental(long rowId, long movie_id, long contact_id, String date_out) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		ContentValues args = new ContentValues();
+		args.put(KEY_RENTAL_MOVIE_ID, movie_id);
+		args.put(KEY_RENTAL_CONTACT_ID, contact_id);
+		args.put(KEY_RENTAL_DATE_OUT, date_out);
+
+		return mDb.update(DATABASE_RENTAL_TABLE, args, KEY_RENTAL_ID + "=" + rowId, null) > 0;
+		
+	}//End of method public boolean updateRental(long, long, long, String)
+	
+	/**
+	 * Deletes a movie by setting the DATE_IN to today's value
+	 * 
+	 * @param rowId Uniquely identifies the rental
+	 * @return True if a record was updated, false if not
+	 */
+	public boolean deleteRental(long rowId) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		DateFormat dateFormat = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
+        Date date = new Date();
+		ContentValues args = new ContentValues();
+		args.put(KEY_RENTAL_DATE_IN, dateFormat.format(date));
+		
+		return mDb.update(DATABASE_RENTAL_TABLE, args, KEY_RENTAL_ID + "=" + rowId, null) > 0;
+		
+	}//End of method public boolean deleteRental(long)
+
+	//////////////////////////////////////////////////////////////
+	//////////////////// CATEGORY METHODS ////////////////////////
+	//////////////////////////////////////////////////////////////
+	/**
+	 * Returns all categories
+	 * 
+	 * @param type Identifies the type of category
+	 * @return A cursor for all the categories belonging to the passed type
+	 */
+	public Cursor fetchAllCategories() {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Cursor mCursor = null;
+		try {
+			mCursor = mDb.query(DATABASE_CATEGORY_TABLE, new String[] { KEY_CATEGORY_ID, KEY_CATEGORY_NAME, KEY_CATEGORY_TYPE }, 
+					null, null, null, null, KEY_CATEGORY_TYPE + " ASC, " +  KEY_CATEGORY_NAME + " ASC");
+			if (mCursor != null) {
+				mCursor.moveToFirst();
+			}
+		} catch(Exception ex) {
+			android.util.Log.v("ERROR", ex.getMessage());
+		}
+		return mCursor;
+	}//End of method public Cursor fetchGategoriesByType(String)
+	
+	/**
+	 * Returns all categories for the passed type
+	 * 
+	 * @param type Identifies the type of category
+	 * @return A cursor for all the categories belonging to the passed type
+	 */
+	public Cursor fetchCategoriesByType(String type) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Cursor mCursor = mDb.query(DATABASE_CATEGORY_TABLE, new String[] { KEY_CATEGORY_ID, KEY_CATEGORY_NAME }, 
+				KEY_CATEGORY_TYPE + " = '" + type + "'", null, null, null, KEY_CATEGORY_NAME + " ASC");
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+	}//End of method public Cursor fetchGategoriesByType(String)
+	
+	/**
+	 * Returns the name of the category based on the id
+	 * 
+	 * @param id Identifies the category
+	 * @return String containing the name
+	 */
+	public String fetchCategoryNameById(Long id) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		String name = "";
+		try {
+			Cursor mCursor = mDb.query(true, DATABASE_CATEGORY_TABLE, new String[] { KEY_CATEGORY_NAME }
+				, KEY_CATEGORY_ID + "=" + id, null, null, null, null, null);
+			if (mCursor != null) {
+				mCursor.moveToFirst();
+				name = mCursor.getString(mCursor.getColumnIndex(KEY_CATEGORY_NAME));
+			}
+		} catch (Exception ex) {
+			android.util.Log.v("FETCH_MOVIE_TITLE_ERROR", ex.getMessage());
+		}
+		return name;
+	}//End of method publicString fetchCategoryById(Long)
+	
+	/**
+	 * Returns the name of the category based on the id
+	 * 
+	 * @param id Identifies the category
+	 * @return String containing the name
+	 */
+	public Long fetchCategoryIdByNameType(String name, String type) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Long id = null;
+		try {
+			Cursor mCursor = mDb.query(true, DATABASE_CATEGORY_TABLE, new String[] { KEY_CATEGORY_ID }
+				, KEY_CATEGORY_NAME + " = '" + name + "' "
+				+ " AND " + KEY_CATEGORY_TYPE + " = '" + type + "'", null, null, null, null, null);
+			if (mCursor != null) {
+				mCursor.moveToFirst();
+				id = mCursor.getLong(mCursor.getColumnIndex(KEY_CATEGORY_ID));
+			}
+		} catch (Exception ex) {
+			android.util.Log.v("FETCH_CATEGORY_ID_ERROR", ex.getMessage());
+		}
+		return id;
+	}//End of method publicString fetchCategoryIdByNameType(String, String)
+	
+	/**
+	 * Returns a cursor to the category record identified by the passed id
+	 * 
+	 * @param id Identifies the category record
+	 * @return Cursor positioned to the record identified by the id
+	 */
+	public Cursor fetchCategoryById(Long id) {
+		
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		Cursor mCursor = null;
+		try {
+			 mCursor = mDb.query(true, DATABASE_CATEGORY_TABLE, new String[] { KEY_CATEGORY_NAME, KEY_CATEGORY_TYPE }
+				, KEY_CATEGORY_ID + "=" + id, null, null, null, null, null);
+			if (mCursor != null) {
+				mCursor.moveToFirst();
+			}
+		} catch (Exception ex) {
+			android.util.Log.v("FETCH_MOVIE_TITLE_ERROR", ex.getMessage());
+		}
+		return mCursor;
+	}//End of method public Cursor fetchCategoriesById(Long)
+	
+	/**
+	 * Deletes the category
+	 * 
+	 * @param categoryId
+	 */
+	public boolean deleteCategory(long categoryId) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		return mDb.delete(DATABASE_CATEGORY_TABLE, KEY_CATEGORY_ID + " = " + categoryId, null) > 0;
+	}//End of method public void deleteCategory(long)
+
+	/**
+	 * Creates a new category record
+	 * @param type The type classification for the category (Movie, Game, Book, CD)
+	 * @param name The text for the category
+	 * @return The ID of the new record
+	 */
+	public long createCategory(String type, String name) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		ContentValues initialValues = new ContentValues();
+		initialValues.put(KEY_CATEGORY_TYPE, type);
+		initialValues.put(KEY_CATEGORY_NAME, name);
+		return mDb.insert(DATABASE_CATEGORY_TABLE, null, initialValues);
+	}//End of method public long createCategory(String, String)
+
+	/**
+	 * Updates the category record
+	 * 
+	 * @param rowId Identifies the category record
+	 * @param type The type classification for the category (Movie, Game, Book, CD)
+	 * @param name The text for the category
+	 */
+	public void updateCategory(Long rowId, String type, String name) {
+		//Verify database connection
+		VerifyDbConnection();
+		
+		//Perform query
+		ContentValues args = new ContentValues();
+		args.put(KEY_CATEGORY_TYPE, type);
+		args.put(KEY_CATEGORY_NAME, name);
+		mDb.update(DATABASE_CATEGORY_TABLE, args, KEY_CATEGORY_ID + "=" + rowId, null);
+	}//End of method public void updateCategory(Long, String, String)
+	
+}// End of public class MoviesDbAdapter
